@@ -4,7 +4,7 @@ A plug and play module for detecting AprilTags on an FTC robot, designed to be u
 
 ## Installation instructions:
 
-**IMPORTANT NOTE: This tutorial assumes you have already set up EasyOpenCV in your workspace**
+**IMPORTANT NOTE: This assumes you have already installed EasyOpenCV!**
 
 1. Open your FTC SDK Android Studio project
 
@@ -22,7 +22,7 @@ A plug and play module for detecting AprilTags on an FTC robot, designed to be u
 
     ![img-here](doc/images/gradle-sync.png)
 
-5. Congrats, you're ready to go! Now check out the example OpModes and pipeline in the examples directory.
+5. Congrats, you're ready to go! Now check out the example OpModes and pipeline in the [examples](https://github.com/OpenFTC/EOCV-AprilTag-Plugin/tree/master/examples/src/main/java/org/firstinspires/ftc/teamcode) directory.
 
 ## Changelog:
 
