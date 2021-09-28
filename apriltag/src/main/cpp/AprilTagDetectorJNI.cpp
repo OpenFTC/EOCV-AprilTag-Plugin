@@ -145,6 +145,7 @@ Java_org_openftc_apriltag_AprilTagDetectorJNI_releaseApriltagDetector(JNIEnv *en
         env->ThrowNew(
                 env->FindClass("java/lang/IllegalArgumentException"),
                 "Pointer must not be null!");
+        return;
     }
 
     __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Freeing april tag detector");

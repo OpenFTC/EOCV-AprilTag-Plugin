@@ -90,8 +90,12 @@ class AprilTagDetectionPipeline extends OpenCvPipeline
     @Override
     public void finalize()
     {
-        // Delete the native context we created in the init() function
-        AprilTagDetectorJNI.releaseApriltagDetector(nativeApriltagPtr);
+        // Might be null if createApriltagDetector() threw an exception
+        if(nativeApriltagPtr != 0)
+        {
+            // Delete the native context we created in the init() function
+            AprilTagDetectorJNI.releaseApriltagDetector(nativeApriltagPtr);
+        }
     }
 
     @Override
