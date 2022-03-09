@@ -21,6 +21,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Log;
+
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -84,6 +86,7 @@ class AprilTagDetectionPipeline extends OpenCvPipeline
     public void init(Mat frame)
     {
         // Allocate a native context object. See the corresponding deletion in the finalizer
+        Log.e("AprilTag Status", "Initialized");
         nativeApriltagPtr = AprilTagDetectorJNI.createApriltagDetector(AprilTagDetectorJNI.TagFamily.TAG_36h11.string, 3, 3);
     }
 
@@ -91,7 +94,13 @@ class AprilTagDetectionPipeline extends OpenCvPipeline
     public void finalize()
     {
         // Delete the native context we created in the init() function
-        AprilTagDetectorJNI.releaseApriltagDetector(nativeApriltagPtr);
+        Log.e("AprilTag Pointer Value", String.valueOf(nativeApriltagPtr));
+        if (nativeApriltagPtr == 0){
+            Log.e("AprilTag Status", "Not properly initialized, error avoided");
+        } else {
+            AprilTagDetectorJNI.releaseApriltagDetector(nativeApriltagPtr);
+            Log.e("AprilTag Status", "Released Sucessfully");
+        }
     }
 
     @Override
