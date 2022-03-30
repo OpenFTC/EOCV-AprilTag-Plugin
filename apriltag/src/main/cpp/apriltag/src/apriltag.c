@@ -37,18 +37,15 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
-#include <inttypes.h>
 
 #include "common/image_u8.h"
 #include "common/image_u8x3.h"
-#include "common/zhash.h"
 #include "common/zarray.h"
 #include "common/matd.h"
 #include "common/homography.h"
 #include "common/timeprofile.h"
 #include "common/math_util.h"
 #include "common/g2d.h"
-#include "common/floats.h"
 
 #include "apriltag_math.h"
 
@@ -89,12 +86,12 @@ struct graymodel
     double C[3];
 };
 
-void graymodel_init(struct graymodel *gm)
+static void graymodel_init(struct graymodel *gm)
 {
     memset(gm, 0, sizeof(struct graymodel));
 }
 
-void graymodel_add(struct graymodel *gm, double x, double y, double gray)
+static void graymodel_add(struct graymodel *gm, double x, double y, double gray)
 {
     // update upper right entries of A = J'J
     gm->A[0][0] += x*x;
@@ -110,12 +107,12 @@ void graymodel_add(struct graymodel *gm, double x, double y, double gray)
     gm->B[2] += gray;
 }
 
-void graymodel_solve(struct graymodel *gm)
+static void graymodel_solve(struct graymodel *gm)
 {
     mat33_sym_solve((double*) gm->A, gm->B, gm->C);
 }
 
-double graymodel_interpolate(struct graymodel *gm, double x, double y)
+static double graymodel_interpolate(struct graymodel *gm, double x, double y)
 {
     return gm->C[0]*x + gm->C[1]*y + gm->C[2];
 }
@@ -151,7 +148,7 @@ static uint64_t rotate90(uint64_t w, int numBits)
     return w;
 }
 
-void quad_destroy(struct quad *quad)
+static void quad_destroy(struct quad *quad)
 {
     if (!quad)
         return;
@@ -161,7 +158,7 @@ void quad_destroy(struct quad *quad)
     free(quad);
 }
 
-struct quad *quad_copy(struct quad *quad)
+static struct quad *quad_copy(struct quad *quad)
 {
     struct quad *q = calloc(1, sizeof(struct quad));
     memcpy(q, quad, sizeof(struct quad));
@@ -172,7 +169,7 @@ struct quad *quad_copy(struct quad *quad)
     return q;
 }
 
-void quick_decode_add(struct quick_decode *qd, uint64_t code, int id, int hamming)
+static void quick_decode_add(struct quick_decode *qd, uint64_t code, int id, int hamming)
 {
     uint32_t bucket = code % qd->nentries;
 
@@ -185,7 +182,7 @@ void quick_decode_add(struct quick_decode *qd, uint64_t code, int id, int hammin
     qd->entries[bucket].hamming = hamming;
 }
 
-void quick_decode_uninit(apriltag_family_t *fam)
+static void quick_decode_uninit(apriltag_family_t *fam)
 {
     if (!fam->impl)
         return;
@@ -196,7 +193,7 @@ void quick_decode_uninit(apriltag_family_t *fam)
     fam->impl = NULL;
 }
 
-void quick_decode_init(apriltag_family_t *family, int maxhamming)
+static void quick_decode_init(apriltag_family_t *family, int maxhamming)
 {
     assert(family->impl == NULL);
     assert(family->ncodes < 65536);
@@ -353,7 +350,7 @@ apriltag_detector_t *apriltag_detector_create()
     apriltag_detector_t *td = (apriltag_detector_t*) calloc(1, sizeof(apriltag_detector_t));
 
     td->nthreads = 1;
-    td->quad_decimate = 3.0;
+    td->quad_decimate = 2.0;
     td->quad_sigma = 0.0;
 
     td->qtp.max_nmaxima = 10;
@@ -371,7 +368,7 @@ apriltag_detector_t *apriltag_detector_create()
     td->tp = timeprofile_create();
 
     td->refine_edges = 1;
-    td->decode_sharpening = 0;
+    td->decode_sharpening = 0.25;
 
 
     td->debug = 0;
@@ -415,7 +412,7 @@ struct evaluate_quad_ret
     struct quick_decode_entry e;
 };
 
-matd_t* homography_compute2(double c[4][4]) {
+static matd_t* homography_compute2(double c[4][4]) {
     double A[] =  {
             c[0][0], c[0][1], 1,       0,       0, 0, -c[0][0]*c[0][2], -c[0][1]*c[0][2], c[0][2],
                   0,       0, 0, c[0][0], c[0][1], 1, -c[0][0]*c[0][3], -c[0][1]*c[0][3], c[0][3],
@@ -444,6 +441,7 @@ matd_t* homography_compute2(double c[4][4]) {
 
         if (max_val < epsilon) {
             fprintf(stderr, "WRN: Matrix is singular.\n");
+            return NULL;
         }
 
         // Swap to get best row.
@@ -477,7 +475,7 @@ matd_t* homography_compute2(double c[4][4]) {
 }
 
 // returns non-zero if an error occurs (i.e., H has no inverse)
-int quad_update_homographies(struct quad *quad)
+static int quad_update_homographies(struct quad *quad)
 {
     //zarray_t *correspondences = zarray_create(sizeof(float[4]));
 
@@ -497,16 +495,19 @@ int quad_update_homographies(struct quad *quad)
 
     // XXX Tunable
     quad->H = homography_compute2(corr_arr);
-
-    quad->Hinv = matd_inverse(quad->H);
-
-    if (quad->H && quad->Hinv)
-        return 0;
-
+    if (quad->H != NULL) {
+        quad->Hinv = matd_inverse(quad->H);
+        if (quad->Hinv != NULL) {
+	    // Success!
+            return 0;
+        }
+        matd_destroy(quad->H);
+        quad->H = NULL;
+    }
     return -1;
 }
 
-double value_for_pixel(image_u8_t *im, double px, double py) {
+static double value_for_pixel(image_u8_t *im, double px, double py) {
     int x1 = floor(px - 0.5);
     int x2 = ceil(px - 0.5);
     double x = px - 0.5 - x1;
@@ -522,7 +523,7 @@ double value_for_pixel(image_u8_t *im, double px, double py) {
             im->buf[y2*im->stride + x2]*x*y;
 }
 
-void sharpen(apriltag_detector_t* td, double* values, int size) {
+static void sharpen(apriltag_detector_t* td, double* values, int size) {
     double *sharpened = malloc(sizeof(double)*size*size);
     double kernel[9] = {
         0, -1, 0,
@@ -555,7 +556,7 @@ void sharpen(apriltag_detector_t* td, double* values, int size) {
 }
 
 // returns the decision margin. Return < 0 if the detection should be rejected.
-float quad_decode(apriltag_detector_t* td, apriltag_family_t *family, image_u8_t *im, struct quad *quad, struct quick_decode_entry *entry, image_u8_t *im_samples)
+static float quad_decode(apriltag_detector_t* td, apriltag_family_t *family, image_u8_t *im, struct quad *quad, struct quick_decode_entry *entry, image_u8_t *im_samples)
 {
     // decode the tag binary contents by sampling the pixel
     // closest to the center of each bit cell.
@@ -867,9 +868,10 @@ static void refine_edges(apriltag_detector_t *td, image_u8_t *im_orig, struct qu
 
             double L0 = W00*B0 + W01*B1;
 
-            // compute intersection
-            quad->p[i][0] = lines[i][0] + L0*A00;
-            quad->p[i][1] = lines[i][1] + L0*A10;
+            // Compute intersection. Note that line i represents the line from corner i to (i+1)&3, so
+	    // the intersection of line i with line (i+1)&3 represents corner (i+1)&3.
+            quad->p[(i+1)&3][0] = lines[i][0] + L0*A00;
+            quad->p[(i+1)&3][1] = lines[i][1] + L0*A10;
         } else {
             // this is a bad sign. We'll just keep the corner we had.
 //            printf("bad det: %15f %15f %15f %15f %15f\n", A00, A11, A10, A01, det);
@@ -895,7 +897,7 @@ static void quad_decode_task(void *_u)
         }
 
         // make sure the homographies are computed...
-        if (quad_update_homographies(quad_original))
+        if (quad_update_homographies(quad_original) != 0)
             continue;
 
         for (int famidx = 0; famidx < zarray_size(td->tag_families); famidx++) {
@@ -974,7 +976,7 @@ void apriltag_detection_destroy(apriltag_detection_t *det)
     free(det);
 }
 
-int prefer_smaller(int pref, double q0, double q1)
+static int prefer_smaller(int pref, double q0, double q1)
 {
     if (pref)     // already prefer something? exit.
         return pref;

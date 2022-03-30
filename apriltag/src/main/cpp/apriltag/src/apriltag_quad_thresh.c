@@ -37,7 +37,6 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include "apriltag.h"
 #include "common/image_u8x3.h"
 #include "common/zarray.h"
-#include "common/zhash.h"
 #include "common/unionfind.h"
 #include "common/timeprofile.h"
 #include "common/zmaxheap.h"
@@ -954,7 +953,7 @@ int fit_quad(
 
         area += sqrt(p*(p-length[0])*(p-length[1])*(p-length[2]));
 
-        if (area < tag_width*tag_width) {
+        if (area < 0.95*tag_width*tag_width) {
             res = 0;
             goto finish;
         }
@@ -1484,7 +1483,7 @@ zarray_t* do_gradient_clusters(image_u8_t* threshim, int ts, int y0, int y1, int
     struct uint64_zarray_entry **clustermap = calloc(nclustermap, sizeof(struct uint64_zarray_entry*));
 
     int mem_chunk_size = 2048;
-    struct uint64_zarray_entry** mem_pools = malloc(sizeof(struct uint64_zarray_entry *)*2*nclustermap/mem_chunk_size);
+    struct uint64_zarray_entry** mem_pools = malloc(sizeof(struct uint64_zarray_entry *)*(1 + 2 * nclustermap / mem_chunk_size)); // SmodeTech: avoid memory corruption when nclustermap < mem_chunk_size
     int mem_pool_idx = 0;
     int mem_pool_loc = 0;
     mem_pools[mem_pool_idx] = calloc(mem_chunk_size, sizeof(struct uint64_zarray_entry));

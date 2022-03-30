@@ -31,7 +31,6 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -39,9 +38,6 @@ either expressed or implied, of the Regents of The University of Michigan.
 #endif
 
 #include "common/workerpool.h"
-#include "common/timeprofile.h"
-#include "common/math_util.h"
-#include "common/string_util.h"
 
 struct workerpool {
     int nthreads;
