@@ -65,14 +65,18 @@ Java_org_openftc_apriltag_AprilTagDetectorJNI_runApriltagDetector(JNIEnv *env, j
     };
 
     zarray_t* detections = apriltag_detector_detect(context->td, &im);
-    int numDetections = zarray_size(detections);
 
-    if(numDetections == 0)
+    // If the array is empty, we're not going to return a pointer to it to
+    // user code, so go ahead and release it now (otherwise it's a memory leak)
+    if(zarray_size(detections) == 0)
     {
+        zarray_destroy(detections);
         return 0;
     }
-
-    return (jlong ) detections;
+    else
+    {
+        return (jlong ) detections;
+    }
 }
 
 extern "C" JNIEXPORT void JNICALL
