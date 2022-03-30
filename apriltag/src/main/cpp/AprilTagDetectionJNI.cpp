@@ -44,6 +44,15 @@ extern "C" JNIEXPORT jint JNICALL
 Java_org_openftc_apriltag_ApriltagDetectionJNI_getId(JNIEnv *env, jclass clazz, jlong ptr)
 {
     apriltag_detection_t* detection = (apriltag_detection*) ptr;
+
+    if(detection == NULL)
+    {
+        env->ThrowNew(
+                env->FindClass("java/lang/IllegalArgumentException"),
+                "Pointer must not be null!");
+        return NULL;
+    }
+
     return detection->id;
 }
 
@@ -51,6 +60,15 @@ extern "C" JNIEXPORT jint JNICALL
 Java_org_openftc_apriltag_ApriltagDetectionJNI_getHamming(JNIEnv *env, jclass clazz, jlong ptr)
 {
     apriltag_detection_t* detection = (apriltag_detection*) ptr;
+
+    if(detection == NULL)
+    {
+        env->ThrowNew(
+                env->FindClass("java/lang/IllegalArgumentException"),
+                "Pointer must not be null!");
+        return NULL;
+    }
+
     return detection->hamming;
 }
 
@@ -58,6 +76,15 @@ extern "C" JNIEXPORT jfloat JNICALL
 Java_org_openftc_apriltag_ApriltagDetectionJNI_getDecisionMargin(JNIEnv *env, jclass clazz, jlong ptr)
 {
     apriltag_detection_t* detection = (apriltag_detection*) ptr;
+
+    if(detection == NULL)
+    {
+        env->ThrowNew(
+                env->FindClass("java/lang/IllegalArgumentException"),
+                "Pointer must not be null!");
+        return NULL;
+    }
+
     return detection->decision_margin;
 }
 
@@ -65,6 +92,15 @@ extern "C" JNIEXPORT jdoubleArray JNICALL
 Java_org_openftc_apriltag_ApriltagDetectionJNI_getCenterpoint(JNIEnv *env, jclass clazz, jlong ptr)
 {
     apriltag_detection_t* detection = (apriltag_detection*) ptr;
+
+    if(detection == NULL)
+    {
+        env->ThrowNew(
+                env->FindClass("java/lang/IllegalArgumentException"),
+                "Pointer must not be null!");
+        return NULL;
+    }
+
     jdoubleArray result = env->NewDoubleArray(2);
     env->SetDoubleArrayRegion(result, 0, 2, detection->c);
 
@@ -75,6 +111,14 @@ extern "C" JNIEXPORT jdouble JNICALL
 Java_org_openftc_apriltag_ApriltagDetectionJNI_getSize(JNIEnv *env, jobject type, jlong ptr)
 {
     apriltag_detection_t* detection = (apriltag_detection*) ptr;
+
+    if(detection == NULL)
+    {
+        env->ThrowNew(
+                env->FindClass("java/lang/IllegalArgumentException"),
+                "Pointer must not be null!");
+        return 0;
+    }
 
     double* pointTopLeft = detection->p[0];
     double* pointBottomLeft = detection->p[1];
@@ -94,6 +138,14 @@ extern "C" JNIEXPORT jobjectArray JNICALL
 Java_org_openftc_apriltag_ApriltagDetectionJNI_getCorners(JNIEnv *env, jclass clazz, jlong ptr)
 {
     apriltag_detection_t* detection = (apriltag_detection*) ptr;
+
+    if(detection == NULL)
+    {
+        env->ThrowNew(
+                env->FindClass("java/lang/IllegalArgumentException"),
+                "Pointer must not be null!");
+        return NULL;
+    }
 
     // Get the length for the first and second dimensions
     unsigned int lengthDim1 = 4; //4 corners
@@ -130,6 +182,14 @@ Java_org_openftc_apriltag_ApriltagDetectionJNI_getPoseEstimate(JNIEnv *env, jcla
                                                       jdouble tag_size, jdouble fx, jdouble fy, jdouble cx, jdouble cy)
 {
     apriltag_detection_t* det = (apriltag_detection*) ptr;
+
+    if(det == NULL)
+    {
+        env->ThrowNew(
+                env->FindClass("java/lang/IllegalArgumentException"),
+                "Pointer must not be null!");
+        return NULL;
+    }
 
     apriltag_detection_info_t info;
     info.det = det;
@@ -226,6 +286,14 @@ Java_org_openftc_apriltag_ApriltagDetectionJNI_getDetectionPointers(JNIEnv *env,
 {
     zarray_t* detections = (zarray_t*) ptr;
 
+    if(detections == NULL)
+    {
+        env->ThrowNew(
+                env->FindClass("java/lang/IllegalArgumentException"),
+                "Pointer must not be null!");
+        return NULL;
+    }
+
     int numDetections = zarray_size(detections);
 
     if(numDetections == 0)
@@ -253,6 +321,14 @@ JNIEXPORT void JNICALL
 Java_org_openftc_apriltag_ApriltagDetectionJNI_freeDetectionList(JNIEnv *env, jclass clazz, jlong jPtrDetections)
 {
     zarray_t* detections = (zarray_t*) jPtrDetections;
+
+    if(detections == NULL)
+    {
+        env->ThrowNew(
+                env->FindClass("java/lang/IllegalArgumentException"),
+                "Pointer must not be null!");
+        return;
+    }
 
     // Destroys the array AND all the detections inside
     apriltag_detections_destroy(detections);

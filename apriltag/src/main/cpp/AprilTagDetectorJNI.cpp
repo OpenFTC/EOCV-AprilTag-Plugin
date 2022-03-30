@@ -48,6 +48,14 @@ Java_org_openftc_apriltag_AprilTagDetectorJNI_runApriltagDetector(JNIEnv *env, j
     cv::Mat* grey  = (cv::Mat*) jPtrGreyscaleMat;
     ApriltagDetectorJniContext* context = (ApriltagDetectorJniContext*) jPtrContext;
 
+    if(context == NULL || grey == NULL)
+    {
+        env->ThrowNew(
+                env->FindClass("java/lang/IllegalArgumentException"),
+                "Pointer must not be null!");
+        return 0;
+    }
+
     // Make an image_u8_t header for the Mat data
     image_u8_t im = {
             .width = grey->cols,
@@ -71,6 +79,15 @@ extern "C" JNIEXPORT void JNICALL
 Java_org_openftc_apriltag_AprilTagDetectorJNI_setApriltagDetectorDecimation(JNIEnv *env, jclass clazz, jlong jPtrContext, jfloat decimate)
 {
     ApriltagDetectorJniContext* context = (ApriltagDetectorJniContext*) jPtrContext;
+
+    if(context == NULL)
+    {
+        env->ThrowNew(
+                env->FindClass("java/lang/IllegalArgumentException"),
+                "Pointer must not be null!");
+        return;
+    }
+
     context->td->quad_decimate = decimate;
 }
 
