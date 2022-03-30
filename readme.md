@@ -15,7 +15,7 @@ A plug and play module for detecting AprilTags on an FTC robot, designed to be u
 3. At the bottom, add this:
 
         dependencies {
-            implementation 'org.openftc:apriltag:1.0.0'
+            implementation 'org.openftc:apriltag:1.1.0'
          }
 
 4. Now perform a Gradle Sync:
@@ -31,6 +31,13 @@ You can download a PDF with the first 20 tags of the 36h11 family [here](https:/
 Alternatively, you can find PNGs [here](https://github.com/AprilRobotics/apriltag-imgs/tree/master/tag36h11)
 
 ## Changelog:
+
+### v1.1.0
+
+ - Updates to latest version of AprilTag as of 30 March 2022
+ - Fixes small memory leak for frames where no detections were found
+ - Protects against NULL pointers in native JNI code
+ - Updates `AprilTagDetectionPipeline` to create the native detector in the constructor instead of in init(). NOTE: You will need to copy-paste the updated file, as this file is not part of the binary release!
 
 ### v1.0.0
 
