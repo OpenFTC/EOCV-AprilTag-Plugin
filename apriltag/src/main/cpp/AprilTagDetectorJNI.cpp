@@ -139,7 +139,7 @@ Java_org_openftc_apriltag_AprilTagDetectorJNI_createApriltagDetector(JNIEnv *env
     ApriltagDetectorJniContext* ptrContext = new ApriltagDetectorJniContext();
     ptrContext->tf = tf;
     ptrContext->td = td;
-    char *strForContext = new char[strlen(famname)];
+    char *strForContext = new char[strlen(famname)+1];
     strcpy(strForContext, famname);
     ptrContext->tagType = strForContext;
 
