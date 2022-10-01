@@ -75,14 +75,14 @@ public class ApriltagDetectionJNI
     public static native double[] getPoseEstimate(long ptr, double tagSize, double fx, double fy, double cx, double cy);
 
     /**
-     * Get a pointer for each of the detections inside a list returned by {@link AprilTagDetectorJNI#runApriltagDetector(long, long)}
-     * @param ptrZarray native pointer from {@link AprilTagDetectorJNI#runApriltagDetector(long, long)}
+     * Get a pointer for each of the detections inside a list returned by {@link AprilTagDetectorJNI#runApriltagDetector(long, long, int, int)}
+     * @param ptrZarray native pointer from {@link AprilTagDetectorJNI#runApriltagDetector(long, long, int, int)}
      * @return an array of native pointers to detections inside the list
      */
     public static native long[] getDetectionPointers(long ptrZarray);
 
     /**
-     * Frees a list of detections obtained from {@link AprilTagDetectorJNI#runApriltagDetector(long, long)}
+     * Frees a list of detections obtained from {@link AprilTagDetectorJNI#runApriltagDetector(long, long, int, int)}
      * AND the detections themselves. (Thus, after calling this, any pointers you may have previously obtained
      * from {@link #getDetectionPointers(long)} are INVALID)
      * @param ptrDetections native pointer to a list of detections
@@ -91,7 +91,7 @@ public class ApriltagDetectionJNI
 
     /**
      * Creates a nice decoupled java representation of the detections in the native detection list
-     * @param ptrDetections native pointer from {@link AprilTagDetectorJNI#runApriltagDetector(long, long)}
+     * @param ptrDetections native pointer from {@link AprilTagDetectorJNI#runApriltagDetector(long, long, int, int)}
      * @param tagSize size of the tag in meters
      * @param fx lens intrinsics fx
      * @param fy lens intrinsics fy

@@ -19,8 +19,6 @@
  * SOFTWARE.
  */
 
-#include <opencv2/core/base.hpp>
-#include <opencv2/core/mat.hpp>
 #include <jni.h>
 #include <apriltag.h>
 #include <tag36h11.h>
@@ -28,13 +26,8 @@
 #include <tag16h5.h>
 #include <tagStandard41h12.h>
 #include <common/getopt.h>
-#include <opencv2/imgproc.hpp>
-
-#include <opencv2/photo.hpp>
-#include <opencv2/core.hpp>
 #include <apriltag_pose.h>
 #include <iostream>
-#include <opencv2/calib3d.hpp>
 #include <android/log.h>
 
 bool closeEnough(const float& a, const float& b, const float& epsilon = std::numeric_limits<float>::epsilon());

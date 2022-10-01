@@ -49,30 +49,14 @@ add_library( # Specifies the name of the library.
              src/main/cpp/apriltag/src/tagCircle21h7.c
              src/main/cpp/apriltag/src/tagStandard41h12.c)
 
-#########################################################
-# You must clone OpenCv-Repackaged into the same parent #
-# directory as this copy of EasyOpenCV in order to be   #
-# able to compile the native code. (Or, you can edit    #
-# these paths)                                          #
-#########################################################
-
 # Specifies a path to native header files.
 include_directories(
                      src/main/cpp/apriltag/include
                      src/main/cpp/apriltag_common/include
-                     ${CMAKE_CURRENT_SOURCE_DIR}/../../OpenCV-Repackaged/doc/native_headers/)
-
-# Specify path to prebuilt object
-
-set(OPENCV_NATIVE_LIB_PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../OpenCV-Repackaged/doc/native_libs)
-
-add_library(openCvNative SHARED IMPORTED)
-set_target_properties(openCvNative PROPERTIES IMPORTED_LOCATION
-        ${OPENCV_NATIVE_LIB_PARENT_DIR}/${ANDROID_ABI}/libOpenCvAndroid453.so)
+)
 
 # linking libs
 target_link_libraries(
         apriltag
-        openCvNative
         log
         android)

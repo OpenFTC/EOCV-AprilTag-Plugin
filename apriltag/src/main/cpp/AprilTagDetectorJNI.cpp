@@ -19,8 +19,6 @@
  * SOFTWARE.
  */
 
-#include <opencv2/core/base.hpp>
-#include <opencv2/core/mat.hpp>
 #include <jni.h>
 #include <apriltag.h>
 #include <tag36h11.h>
@@ -28,9 +26,6 @@
 #include <tag16h5.h>
 #include <tagStandard41h12.h>
 #include <common/getopt.h>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/photo.hpp>
-#include <opencv2/core.hpp>
 #include <android/log.h>
 
 const char* LOG_TAG = "AprilTagDetectorJNI";
@@ -43,12 +38,11 @@ struct ApriltagDetectorJniContext
 };
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_org_openftc_apriltag_AprilTagDetectorJNI_runApriltagDetector(JNIEnv *env, jclass clazz, jlong jPtrContext, jlong jPtrGreyscaleMat)
+Java_org_openftc_apriltag_AprilTagDetectorJNI_runApriltagDetector(JNIEnv *env, jclass clazz, jlong jPtrContext, jlong ptrGreyscaleBuf, jint width, jint height)
 {
-    cv::Mat* grey  = (cv::Mat*) jPtrGreyscaleMat;
     ApriltagDetectorJniContext* context = (ApriltagDetectorJniContext*) jPtrContext;
 
-    if(context == NULL || grey == NULL)
+    if(context == NULL || ptrGreyscaleBuf == NULL)
     {
         env->ThrowNew(
                 env->FindClass("java/lang/IllegalArgumentException"),
@@ -58,10 +52,10 @@ Java_org_openftc_apriltag_AprilTagDetectorJNI_runApriltagDetector(JNIEnv *env, j
 
     // Make an image_u8_t header for the Mat data
     image_u8_t im = {
-            .width = grey->cols,
-            .height = grey->rows,
-            .stride = grey->cols,
-            .buf = grey->data
+            .width = width,
+            .height = height,
+            .stride = width,
+            .buf = (uint8_t*) ptrGreyscaleBuf
     };
 
     zarray_t* detections = apriltag_detector_detect(context->td, &im);

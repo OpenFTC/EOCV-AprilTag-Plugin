@@ -61,11 +61,13 @@ public class AprilTagDetectorJNI
     /**
      * Run an AprilTag detector on a greyscale image
      * @param ptrDetector native pointer to an AprilTag detector, obtained from {@link #createApriltagDetector(String, float, int)}
-     * @param ptrGreyMat native pointer to a greyscale OpenCV Mat
+     * @param ptrGreyscaleBuf native pointer to a greyscale image buffer
+     * @param width the width of the greyscale buffer
+     * @param height the height of the greyscale buffer
      * @return a native pointer to a list of detections, or 0 if nothing was detected.
      *         If non-zero, must be freed with {@link ApriltagDetectionJNI#freeDetectionList(long)}
      */
-    public static native long runApriltagDetector(long ptrDetector, long ptrGreyMat);
+    public static native long runApriltagDetector(long ptrDetector, long ptrGreyscaleBuf, int width, int height);
 
     /**
      * Run an AprilTag detector on a greyscale image
@@ -81,7 +83,7 @@ public class AprilTagDetectorJNI
     public static ArrayList<AprilTagDetection> runAprilTagDetectorSimple(long ptrDetector, Mat grey, double tagSize, double fx, double fy, double cx, double cy)
     {
         ArrayList<AprilTagDetection> detections = new ArrayList<>();
-        long ptrDetectionArray = runApriltagDetector(ptrDetector, grey.nativeObj);
+        long ptrDetectionArray = runApriltagDetector(ptrDetector, grey.dataAddr(), grey.width(), grey.height());
         if(ptrDetectionArray != 0)
         {
             detections = ApriltagDetectionJNI.getDetections(ptrDetectionArray, tagSize, fx, fy, cx, cy);
