@@ -26,7 +26,7 @@ android {
 
 dependencies {
     //implementation fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly 'org.firstinspires.ftc:RobotCore:7.0.0'
-    compileOnly 'org.openftc:easyopencv:1.5.0'
+    compileOnly 'org.firstinspires.ftc:RobotCore:8.0.0'
+    compileOnly 'org.openftc:easyopencv:1.5.2'
     implementation project (':apriltag')
 }
