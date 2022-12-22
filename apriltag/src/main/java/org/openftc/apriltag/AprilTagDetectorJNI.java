@@ -101,6 +101,7 @@ public class AprilTagDetectorJNI
 
     static
     {
+        System.out.println("AprilTag plugin v" + BuildConfig.VERSION_NAME);
         System.loadLibrary("apriltag");
     }
 }
