@@ -27,20 +27,105 @@
 #include <tagStandard41h12.h>
 #include <common/getopt.h>
 #include <android/log.h>
+#include "stdexcept"
 
 const char* LOG_TAG = "AprilTagDetectorJNI";
 
-struct ApriltagDetectorJniContext
+class AprilTagFamily
 {
-    apriltag_family_t *tf = NULL;
-    apriltag_detector_t *td = NULL;
-    char* tagType = NULL;
+private:
+    const char* const FAMILY_36h11 = "tag36h11";
+    const char* const FAMILY_25h9 = "tag25h9";
+    const char* const FAMILY_16h5 = "tag16h5";
+    const char* const FAMILY_41h12 = "tagStandard41h12";
+
+public:
+    apriltag_family_t* tf = NULL;
+
+public:
+    AprilTagFamily(const char* const familyName)
+    {
+        if (!strcmp(familyName, FAMILY_36h11))
+        {
+            __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Creating 36h11 tag family");
+            tf = tag36h11_create();
+        }
+        else if (!strcmp(familyName, FAMILY_25h9))
+        {
+            __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Creating 25h9 tag family");
+            tf = tag25h9_create();
+        }
+        else if (!strcmp(familyName, FAMILY_16h5))
+        {
+            __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Creating 16h5 tag family");
+            tf = tag16h5_create();
+        }
+        else if (!strcmp(familyName, FAMILY_41h12))
+        {
+            __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Creating Standard41h12 tag family");
+            tf = tagStandard41h12_create();
+        }
+        else
+        {
+            throw std::invalid_argument("Unsupported tag family name. Use e.g. \"tag36h11\".");
+        }
+    }
+
+    ~AprilTagFamily()
+    {
+        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Freeing tag family %s", tf->name);
+
+        if (!strcmp(tf->name, FAMILY_36h11))
+        {
+            tag36h11_destroy(tf);
+        }
+        else if (!strcmp(tf->name, FAMILY_25h9))
+        {
+            tag25h9_destroy(tf);
+        }
+        else if (!strcmp(tf->name, FAMILY_16h5))
+        {
+            tag16h5_destroy(tf);
+        }
+        else if (!strcmp(tf->name, FAMILY_41h12))
+        {
+            tagStandard41h12_destroy(tf);
+        }
+        else
+        {
+            __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "FAILED to free unknown tag family %s", tf->name);
+        }
+    }
+};
+
+class AprilTagCtx
+{
+    AprilTagFamily tf;
+
+public:
+    apriltag_detector_t* td;
+
+public:
+    AprilTagCtx(const char* const familyName, int threads, float decimate) : tf(familyName)
+    {
+        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Initializing april tag detector");
+        td = apriltag_detector_create();
+        td->nthreads = threads;
+        td->quad_decimate = decimate;
+        apriltag_detector_add_family(td,tf.tf);
+    }
+
+    ~AprilTagCtx()
+    {
+        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Freeing april tag detector");
+        apriltag_detector_destroy(td);
+    }
 };
 
 extern "C" JNIEXPORT jlong JNICALL
 Java_org_openftc_apriltag_AprilTagDetectorJNI_runApriltagDetector(JNIEnv *env, jclass clazz, jlong jPtrContext, jlong ptrGreyscaleBuf, jint width, jint height)
 {
-    ApriltagDetectorJniContext* context = (ApriltagDetectorJniContext*) jPtrContext;
+    AprilTagCtx* context = (AprilTagCtx*) jPtrContext;
 
     if(context == NULL || ptrGreyscaleBuf == NULL)
     {
@@ -76,7 +161,7 @@ Java_org_openftc_apriltag_AprilTagDetectorJNI_runApriltagDetector(JNIEnv *env, j
 extern "C" JNIEXPORT void JNICALL
 Java_org_openftc_apriltag_AprilTagDetectorJNI_setApriltagDetectorDecimation(JNIEnv *env, jclass clazz, jlong jPtrContext, jfloat decimate)
 {
-    ApriltagDetectorJniContext* context = (ApriltagDetectorJniContext*) jPtrContext;
+    AprilTagCtx* context = (AprilTagCtx*) jPtrContext;
 
     if(context == NULL)
     {
@@ -94,68 +179,28 @@ Java_org_openftc_apriltag_AprilTagDetectorJNI_createApriltagDetector(JNIEnv *env
 {
     const char *famname = env->GetStringUTFChars(jfamname, nullptr);
 
-    apriltag_family_t *tf = NULL;
-
-    if (!strcmp(famname, "tag36h11"))
+    try
     {
-        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Creating 36h11 tag family");
-        tf = tag36h11_create();
+        AprilTagCtx* ptrContext = new AprilTagCtx(famname, threads, decimate);
+        return (jlong) ptrContext;
     }
-    else if (!strcmp(famname, "tag25h9"))
-    {
-        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Creating 25h9 tag family");
-        tf = tag25h9_create();
-    }
-    else if (!strcmp(famname, "tag16h5"))
-    {
-        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Creating 16h5 tag family");
-        tf = tag16h5_create();
-    }
-    else if (!strcmp(famname, "tagStandard41h12"))
-    {
-        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Creating Standard41h12 tag family");
-        tf = tagStandard41h12_create();
-    }
-    else
+    catch (std::invalid_argument& e)
     {
         env->ThrowNew(
                 env->FindClass("java/lang/IllegalArgumentException"),
-                "Unrecognized tag family name. Use e.g. \"tag36h11\".");
-
-        return 0;
+                e.what());
     }
 
-    __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Initializing april tag detector");
-    apriltag_detector_t* td = apriltag_detector_create();
-    td->nthreads = threads;
-    td->quad_decimate = decimate;
-    //td->debug = true;
-//    td->quad_sigma = blur;
-//    td->refine_edges = refineEdges;
-
-    apriltag_detector_add_family(td, tf);
-
-    __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Initializing april tag JNI context object");
-    ApriltagDetectorJniContext* ptrContext = new ApriltagDetectorJniContext();
-    ptrContext->tf = tf;
-    ptrContext->td = td;
-    char *strForContext = new char[strlen(famname)+1];
-    strcpy(strForContext, famname);
-    ptrContext->tagType = strForContext;
-
     env->ReleaseStringUTFChars(jfamname, famname);
-
-    jlong ret = (jlong) ptrContext;
-
-    return ret;
+    return 0;
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_org_openftc_apriltag_AprilTagDetectorJNI_releaseApriltagDetector(JNIEnv *env, jclass clazz, jlong ptrContext)
 {
-    ApriltagDetectorJniContext* bridge = (ApriltagDetectorJniContext*) ptrContext;
+    AprilTagCtx* context = (AprilTagCtx*) ptrContext;
 
-    if(bridge == NULL)
+    if(context == NULL)
     {
         env->ThrowNew(
                 env->FindClass("java/lang/IllegalArgumentException"),
@@ -163,34 +208,7 @@ Java_org_openftc_apriltag_AprilTagDetectorJNI_releaseApriltagDetector(JNIEnv *en
         return;
     }
 
-    __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Freeing april tag detector");
-    apriltag_detector_destroy(bridge->td);
-
-    char *famname = bridge->tagType;
-    apriltag_family_t *tf = bridge->tf;
-
-    __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Freeing tag family");
-
-    if (!strcmp(famname, "tag36h11"))
-    {
-        tag36h11_destroy(tf);
-    }
-    else if (!strcmp(famname, "tag25h9"))
-    {
-        tag25h9_destroy(tf);
-    }
-    else if (!strcmp(famname, "tag16h5"))
-    {
-        tag16h5_destroy(tf);
-    }
-    else if (!strcmp(famname, "tagStandard41h12"))
-    {
-        tagStandard41h12_destroy(tf);
-    }
-
-    __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Freeing tag type");
-    delete[] bridge->tagType;
-
     __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Freeing april tag JNI context object");
-    delete bridge;
+    delete context;
+    __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "Freed april tag JNI context object");
 }
