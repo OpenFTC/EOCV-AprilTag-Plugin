@@ -15,7 +15,7 @@ A plug and play module for detecting AprilTags on an FTC robot, designed to be u
 3. At the bottom, add this:
 
         dependencies {
-            implementation 'org.openftc:apriltag:1.1.0'
+            implementation 'org.openftc:apriltag:1.1.1'
          }
 
 4. Now perform a Gradle Sync:
@@ -31,6 +31,13 @@ You can download a PDF with the first 20 tags of the 36h11 family [here](https:/
 Alternatively, you can find PNGs [here](https://github.com/AprilRobotics/apriltag-imgs/tree/master/tag36h11)
 
 ## Changelog:
+
+### v1.1.1
+
+ - Fixes OpenCV-Repackaged dependency to be `compileOnly`
+ - Removes need to link against OpenCV native library
+ - Fixes buffer overrun when creating JNI detector context
+ - Prints library version in static initializer
 
 ### v1.1.0
 
