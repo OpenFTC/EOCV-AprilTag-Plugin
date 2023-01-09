@@ -2,9 +2,19 @@
 
 A plug and play module for detecting AprilTags on an FTC robot, designed to be used from EasyOpenCV
 
-## Installation instructions:
+## Installation instructions (OnBotJava):
 
-**IMPORTANT NOTE: This assumes you have already installed EasyOpenCV!**
+**IMPORTANT NOTE: This assumes you have already [installed EasyOpenCV](https://github.com/OpenFTC/EasyOpenCV#installation-instructions-onbotjava)!**
+
+1. Download the latest release AAR from Maven Central. Release v1.1.1 is located [here](https://repo1.maven.org/maven2/org/openftc/apriltag/1.1.1/apriltag-1.1.1.aar).
+
+2. In the OnBotJava console, click the Upload Files button (to the left of the trash can), select the `.aar` file you just downloaded, and wait while OnBotJava processes the library.
+
+3. Congrats, you're ready to go! Now check out the example OpModes and pipeline in the [examples](https://github.com/OpenFTC/EOCV-AprilTag-Plugin/tree/master/examples/src/main/java/org/firstinspires/ftc/teamcode) directory.
+
+## Installation instructions (Android Studio):
+
+**IMPORTANT NOTE: This assumes you have already [installed EasyOpenCV](https://github.com/OpenFTC/EasyOpenCV#installation-instructions-android-studio)!**
 
 1. Open your FTC SDK Android Studio project
 
