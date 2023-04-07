@@ -201,10 +201,10 @@ Java_org_openftc_apriltag_ApriltagDetectionJNI_getPoseEstimate(JNIEnv *env, jcla
 
     rotationMatrixToEulerAngles_rad(pose.R, eulerAngles);
 
-    jdoubleArray result = env->NewDoubleArray(6);
+    jdoubleArray result = env->NewDoubleArray(3 + 3*3);
     //__android_log_print(ANDROID_LOG_DEBUG, "APRIL", "Pose: X=%.2f Y=%.2f Z=%.2f", pose.t->data[0], pose.t->data[1], pose.t->data[2]);
-    env->SetDoubleArrayRegion(result, 0, 3, pose.t->data);
-    env->SetDoubleArrayRegion(result, 3, 3, eulerAngles);
+    env->SetDoubleArrayRegion(result, 0, 3 /* 0->2  */, pose.t->data);
+    env->SetDoubleArrayRegion(result, 3, 9 /* 3->8  */, pose.R->data);
 
     return result;
 }
