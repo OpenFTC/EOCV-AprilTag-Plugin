@@ -30,9 +30,6 @@
 #include <iostream>
 #include <android/log.h>
 
-bool closeEnough(const float& a, const float& b, const float& epsilon = std::numeric_limits<float>::epsilon());
-void rotationMatrixToEulerAngles_rad(matd_t* R, double *out);
-
 extern "C" JNIEXPORT jint JNICALL
 Java_org_openftc_apriltag_ApriltagDetectionJNI_getId(JNIEnv *env, jclass clazz, jlong ptr)
 {
@@ -197,81 +194,12 @@ Java_org_openftc_apriltag_ApriltagDetectionJNI_getPoseEstimate(JNIEnv *env, jcla
     //double err = estimate_tag_pose(&info, &pose);
     estimate_tag_pose(&info, &pose);
 
-    double eulerAngles[3];
-
-    rotationMatrixToEulerAngles_rad(pose.R, eulerAngles);
-
     jdoubleArray result = env->NewDoubleArray(3 + 3*3);
     //__android_log_print(ANDROID_LOG_DEBUG, "APRIL", "Pose: X=%.2f Y=%.2f Z=%.2f", pose.t->data[0], pose.t->data[1], pose.t->data[2]);
     env->SetDoubleArrayRegion(result, 0, 3 /* 0->2  */, pose.t->data);
     env->SetDoubleArrayRegion(result, 3, 9 /* 3->8  */, pose.R->data);
 
     return result;
-}
-
-// Found online somewhere...
-void rotationMatrixToEulerAngles_rad(matd_t* R, double *out)
-{
-    //check for gimbal lock
-    if (closeEnough(MATD_EL(R, 0, 2), -1.0f))
-    {
-        float x = 0; //gimbal lock, value of x doesn't matter
-        float y = M_PI / 2;
-        float z = x + atan2(MATD_EL(R, 1, 0), MATD_EL(R, 2, 0));
-
-        out[0] = x;
-        out[1] = y;
-        out[2] = z;
-
-        return;
-    }
-    else if (closeEnough(MATD_EL(R, 0, 2), 1.0f))
-    {
-        float x = 0;
-        float y = -M_PI / 2;
-        float z = -x + atan2(-MATD_EL(R, 1, 0), -MATD_EL(R, 2, 0));
-
-        out[0] = x;
-        out[1] = y;
-        out[2] = z;
-
-        return;
-    }
-    else //two solutions exist
-    {
-        float x1 = -asin(MATD_EL(R, 0, 2));
-        float x2 = M_PI - x1;
-
-        float y1 = atan2(MATD_EL(R, 1, 2) / cos(x1), MATD_EL(R, 2, 2) / cos(x1));
-        float y2 = atan2(MATD_EL(R, 1, 2) / cos(x2), MATD_EL(R, 2, 2) / cos(x2));
-
-        float z1 = atan2(MATD_EL(R, 0, 1) / cos(x1), MATD_EL(R, 0, 0) / cos(x1));
-        float z2 = atan2(MATD_EL(R, 0, 1) / cos(x2), MATD_EL(R, 0, 0) / cos(x2));
-
-        //choose one solution to return
-        //for example the "shortest" rotation
-        if ((std::abs(x1) + std::abs(y1) + std::abs(z1)) <= (std::abs(x2) + std::abs(y2) + std::abs(z2)))
-        {
-            out[0] = x1;
-            out[1] = y1;
-            out[2] = z1;
-
-            return;
-        }
-        else
-        {
-            out[0] = x2;
-            out[1] = y2;
-            out[2] = z2;
-
-            return;
-        }
-    }
-}
-
-bool closeEnough(const float& a, const float& b, const float& epsilon)
-{
-    return (epsilon > std::abs(a - b));
 }
 
 extern "C" JNIEXPORT jlongArray JNICALL
