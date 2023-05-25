@@ -49,6 +49,12 @@ add_library( # Specifies the name of the library.
              src/main/cpp/apriltag/src/tagCircle21h7.c
              src/main/cpp/apriltag/src/tagStandard41h12.c)
 
+# VROOOOOOOM
+target_compile_options(apriltag PRIVATE
+        "$<$<CONFIG:RELEASE>:-O3>"
+        "$<$<CONFIG:DEBUG>:-O3>"
+        )
+
 # Specifies a path to native header files.
 include_directories(
                      src/main/cpp/apriltag/include
