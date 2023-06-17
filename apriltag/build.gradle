@@ -3,7 +3,7 @@ apply plugin: 'com.android.library'
 ext {
     PUBLISH_GROUP_ID = 'org.openftc'
     PUBLISH_ARTIFACT_ID = 'apriltag'
-    PUBLISH_VERSION = '1.1.1'
+    PUBLISH_VERSION = '2.0.0'
 
     PUBLISH_DESC = 'EOCV-AprilTag-Plugin'
     PUBLISH_URL = 'https://github.com/OpenFTC/EOCV-AprilTag-Plugin'
