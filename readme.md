@@ -6,7 +6,7 @@ A plug and play module for detecting AprilTags on an FTC robot, designed to be u
 
 **IMPORTANT NOTE: This assumes you have already [installed EasyOpenCV](https://github.com/OpenFTC/EasyOpenCV#installation-instructions-onbotjava)!**
 
-1. Download the latest release AAR from Maven Central. Release v2.0.0 is located [here](https://repo1.maven.org/maven2/org/openftc/apriltag/2.0.0/apriltag-2.0.0.aar).
+1. Download the latest release AAR from Maven Central. Release v2.1.0 is located [here](https://repo1.maven.org/maven2/org/openftc/apriltag/2.1.0/apriltag-2.1.0.aar).
 
 2. In the OnBotJava console, click the Upload Files button (to the left of the trash can), select the `.aar` file you just downloaded, and wait while OnBotJava processes the library.
 
@@ -25,7 +25,7 @@ A plug and play module for detecting AprilTags on an FTC robot, designed to be u
 3. At the bottom, add this:
 
         dependencies {
-            implementation 'org.openftc:apriltag:2.0.0'
+            implementation 'org.openftc:apriltag:2.1.0'
          }
 
 4. Now perform a Gradle Sync:
@@ -41,6 +41,10 @@ You can download a PDF with the first 20 tags of the 36h11 family [here](https:/
 Alternatively, you can find PNGs [here](https://github.com/AprilRobotics/apriltag-imgs/tree/master/tag36h11)
 
 ## Changelog:
+
+### v2.1.0
+
+- Updates to the latest version of AprilTag as of 8 June 2024
 
 ### v2.0.0
 
