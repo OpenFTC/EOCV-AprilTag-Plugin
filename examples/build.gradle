@@ -1,11 +1,14 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 19
+
+    namespace "org.openftc.apriltag.examples"
+
+    compileSdkVersion 23
 
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 19
+        minSdkVersion 23
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
 
@@ -18,8 +21,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = '1.7'
-        targetCompatibility = '1.7'
+        sourceCompatibility = "1.8"
+        targetCompatibility = "1.8"
     }
 
 }
