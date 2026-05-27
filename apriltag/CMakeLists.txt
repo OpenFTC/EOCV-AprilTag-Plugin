@@ -26,6 +26,7 @@ add_library( # Specifies the name of the library.
              apriltag/common/getopt.c
              apriltag/common/homography.c
              apriltag/common/image_u8.c
+             apriltag/common/image_u8_parallel.c
              apriltag/common/image_u8x3.c
              apriltag/common/image_u8x4.c
              apriltag/common/matd.c
