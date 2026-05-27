@@ -4,10 +4,11 @@ android {
 
     namespace "org.openftc.apriltag.examples"
 
-    compileSdkVersion 23
+    compileSdk 23
 
     defaultConfig {
         minSdkVersion 23
+        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"

@@ -1,24 +1,24 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
-ext {
-    PUBLISH_GROUP_ID = 'org.openftc'
-    PUBLISH_ARTIFACT_ID = 'apriltag'
-    PUBLISH_VERSION = '2.1.0'
-
-    PUBLISH_DESC = 'EOCV-AprilTag-Plugin'
-    PUBLISH_URL = 'https://github.com/OpenFTC/EOCV-AprilTag-Plugin'
-    PUBLISH_VCS_URL = 'https://github.com/OpenFTC/EOCV-AprilTag-Plugin/tree/master'
-    PUBLISH_VCS_CONNECTION = 'scm:git:github.com/OpenFTC/EOCV-AprilTag-Plugin.git'
+ext{
+    PUBLISH_VERSION = '2.2.0'
 }
+
+ext["signing.keyId"] = System.getenv('OPENFTC_GPG_KEY_ID')
+ext["signing.password"] = System.getenv('OPENFTC_GPG_KEY_PASSWORD')
+ext["signing.secretKeyRingFile"] = System.getenv('OPENFTC_GPG_KEY_FILE')
 
 android {
 
     namespace "org.openftc.apriltag"
 
-    compileSdkVersion 23
+    compileSdk 23
 
     defaultConfig {
         minSdkVersion 23
+        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 23
         versionCode 1
         versionName PUBLISH_VERSION
@@ -53,6 +53,13 @@ android {
         }
     }
 
+    publishing{
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+
     // Encapsulates your external native build configurations.
     externalNativeBuild {
 
@@ -81,4 +88,55 @@ dependencies {
     compileOnly 'com.android.support:support-annotations:28.0.0'
 }
 
-//apply from: '../sonatype-publish.gradle'
+publishing {
+
+    publications {
+        release(MavenPublication) {
+            groupId = 'org.openftc'
+            artifactId = 'apriltag'
+            version = PUBLISH_VERSION
+
+            afterEvaluate {
+                from components.release
+            }
+
+            // Self-explanatory metadata for the most part
+            pom {
+                name = "apriltag"
+                description = "AprilTag library for FTC"
+                url = "https://github.com/OpenFTC/EOCV-AprilTag-Plugin"
+                licenses {
+                    license {
+                        name = 'MIT'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'openftc'
+                        name = 'OpenFTC Team'
+                        email = 'contact@openftc.org'
+                        organization = 'OpenFTC'
+                        organizationUrl = 'openftc.org'
+                    }
+                }
+                // Version control info, if you're using GitHub, follow the format as seen here
+                scm {
+                    connection = "scm:git:github.com/OpenFTC/EOCV-AprilTag-Plugin.git"
+                    url = "https://github.com/OpenFTC/EOCV-AprilTag-Plugin/tree/master"
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'myrepo'
+            url = layout.buildDirectory.dir("repo")
+        }
+    }
+}
+
+signing {
+    sign publishing.publications
+}
